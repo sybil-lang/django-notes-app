@@ -25,3 +25,5 @@ EXPOSE 8000
 
 # Default command (you can override in docker-compose)
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+#this is opitmized docker file
