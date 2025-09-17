@@ -1,20 +1,27 @@
-FROM python:3.9
+# Use a smaller base image
+FROM python:3.9-slim
 
+# Set working directory
 WORKDIR /app/backend
 
-COPY requirements.txt /app/backend
-RUN apt-get update \
-    && apt-get upgrade -y \
-    && apt-get install -y gcc default-libmysqlclient-dev pkg-config \
-    && rm -rf /var/lib/apt/lists/*
+# Install system dependencies (only required ones)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    default-libmysqlclient-dev \
+    pkg-config \
+ && rm -rf /var/lib/apt/lists/*
 
+# Copy only requirements first (so Docker can cache deps if code changes)
+COPY requirements.txt .
 
-# Install app dependencies
-RUN pip install mysqlclient
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . /app/backend
+# Copy the rest of the code
+COPY . .
 
+# Expose port
 EXPOSE 8000
-#RUN python manage.py migrate
-#RUN python manage.py makemigrations
+
+# Default command (you can override in docker-compose)
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
